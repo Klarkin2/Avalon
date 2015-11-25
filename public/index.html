@@ -4,40 +4,65 @@
   <meta charset="UTF-8">
   <title>Avalon Helper</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 </head>
 <body>
-  <ul class="pages">
-    <li class="login page">
-      <div class="loginArea">
-        <h3 class="title">Username</h3>
-        <input class="usernameInput" type="text" maxlength="20"/>
+  <div class="container ">
+    <ul class="pages">
+      <div class="row login page ">
+        <div class="col-lg-4 ">
+          <li>
+            <div class="loginArea">
+              <h3 class="title">Username</h3>
+              <input class="usernameInput" type="text" maxlength="20"/>
+            </div>
+          </li>
+        </div>
       </div>
-    </li>
-    <li class="numPeople page">
-      <div class="numPeopleArea">
-        <h3 class="title">Number of Players</h3>
-        <input class="numPeopleInput" type="number" maxlength="2" />
+    <div class="row numPeople page">
+      <div class="col-lg-4">
+        <li>
+          <div class="numPeopleArea">
+            <h3 class="title">Number of Players</h3>
+            <input class="numPeopleInput" type="number" maxlength="2" />
+          </div>
+        </li>
       </div>
-    </li>
-    <li class="charSelect page">
-      <div class="charSelectArea">
-        <ul class="charSelectList"></ul>
+    </div>
+    <div class="row charSelect page">
+      <div class="col-lg-4">
+        <li>
+          <div class="charSelectArea">
+            <ul class="charSelectList"></ul>
+          </div>
+        </li>
       </div>
-    </li>
-    <li class="waiting page">
-      <div class="waitingArea">
-        <h3 class="waitingText">Waiting...</h3>
+    </div>
+    <div class="row waiting page">
+      <div class="col-lg-4">
+        <li>
+          <div class="waitingArea">
+            <h3 class="waitingText">Waiting...</h3>
+          </div>
+        </li>
       </div>
-    </li>
+    </div>
+
     <li class="charAndReveal page">
-      <div id="card"> 
-        <div class="front"> 
-          <img src="/images/Back.png" name="frontSide" class="cards"/>
-        </div> 
-        <div class="back">
-          <img src="/images/Back.png" name="backSide" class="cards"/>
-        </div> 
+      <div class="row">
+        <div class="col-lg-4">
+          <div id="card"> 
+            <div class="front"> 
+              <img src="/images/back.png" name="frontSide" class="cards thumbnail"/>
+            </div> 
+            <div class="back">
+              <img src="/images/back.png" name="backSide" class="cards thumbnail"/>
+            </div> 
+          </div>
+        </div>
       </div>
+
       <ul class="nameReveal"></ul>
     </li>
     <li class="roster page">
@@ -49,6 +74,8 @@
       </div>
     </li>
   </ul>
+  </div>
+  
   <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
   <script src="https://cdn.rawgit.com/nnattawat/flip/v1.0.16/dist/jquery.flip.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>

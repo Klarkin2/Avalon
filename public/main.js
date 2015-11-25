@@ -114,7 +114,7 @@ $(function() {
 				names = (charObj['know']) ? charObj['know'] : "";
 				for(var i = 0; i < names.length; i++) {
 					$name = $('<label>' + names[i] + '</label>');
-					$revealName = $('<li class="namesIKnow"/>')
+					$revealName = $('<div class="row"><div class="col-lg-12"><li class="namesIKnow"/></div></div>')
 						.append($name);
 					$nameReveal.append($revealName);
 				}
