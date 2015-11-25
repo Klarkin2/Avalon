@@ -1,0 +1,302 @@
+/* Fix user-agent */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+
+html, input {
+  font-family:
+    "HelveticaNeue-Light",
+    "Helvetica Neue Light",
+    "Helvetica Neue",
+    Helvetica,
+    Arial,
+    "Lucida Grande",
+    sans-serif;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+ul {
+  list-style: none;
+  word-wrap: break-word;
+}
+
+input[type='checkbox'] {
+  -webkit-appearance:none;
+  width:50px;
+  height:50px;
+  background:white;
+  border-radius:5px;
+  border:2px solid #555;
+}
+input[type='checkbox']:checked {
+  background: #0066ff;
+}
+
+img {        
+  display:block;
+  margin-left:auto;
+  margin-right:auto;
+  width: 70%;
+  border-radius: 40px;
+}
+
+.submitButton {
+  height: 70px;
+  width: 320px;
+  font-size: 300%;
+  color: #515151;
+  background: #d3d3d3;
+  display: inline-block;
+  position: relative;
+  margin-top: 60px;
+  margin-left: 20px;
+  padding: 5px 20px;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 1px 1px 1px rgba(255,255,255, .22);
+
+  -webkit-border-radius: 30px;
+  -moz-border-radius: 30px;
+  border-radius: 30px;
+  -webkit-transition: all 0.15s ease;
+  -moz-transition: all 0.15s ease;
+  -o-transition: all 0.15s ease;
+  -ms-transition: all 0.15s ease;
+  transition: all 0.15s ease;
+}
+
+.submitButton:active {
+  -webkit-box-shadow: inset 0px 0px 10px rgba(0,0,0,.8);
+  -moz-box-shadow: inset 0px 0px 10px rgba(0,0,0, .8);
+  box-shadow: inset 0px 0px 10px rgba(0,0,0, .8);
+}
+
+
+/*
+//this is good css for the good/evil win tracker
+.reset {
+  width: 11%;
+  padding: 10px;
+  position: absolute;
+  margin-left: 2%;
+  margin-top: 2%;
+}*/
+
+.nameReveal {
+  height: 70px;
+  width: 50%;
+  font-size: 300%;
+  color: #989898;
+  background: #000;
+  display: inline-block;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+}
+
+.rosterButton {
+  height: 70px;
+  width: 50%;
+  font-size: 300%;
+  color: #515151;
+  background: #d3d3d3;
+  display: inline-block;
+  padding: 5px 20px;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 1px 1px 1px rgba(255,255,255, .22);
+
+  -webkit-border-radius: 30px;
+  -moz-border-radius: 30px;
+  border-radius: 30px;
+  -webkit-transition: all 0.15s ease;
+  -moz-transition: all 0.15s ease;
+  -o-transition: all 0.15s ease;
+  -ms-transition: all 0.15s ease;
+  transition: all 0.15s ease;
+}
+
+.rosterButton:active {
+  -webkit-box-shadow: inset 0px 0px 10px rgba(0,0,0,.8);
+  -moz-box-shadow: inset 0px 0px 10px rgba(0,0,0, .8);
+  box-shadow: inset 0px 0px 10px rgba(0,0,0, .8);
+}
+
+/* Pages */
+
+.pages {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.page {
+  height: 100%;
+  position: absolute;
+  width: 100%;
+}
+
+/* Login Page */
+
+.login.page {
+  background-color: #000;
+}
+
+.login.page .loginArea {
+  height: 100px;
+  margin-top: -100px;
+  position: absolute;
+
+  text-align: center;
+  top: 5%;
+  width: 100%;
+}
+
+.login.page .loginArea .usernameInput {
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid #fff;
+  outline: none;
+  padding-bottom: 15px;
+  text-align: center;
+  width: 600px;
+}
+
+.login.page .title {
+  font-size: 500%;
+}
+
+.login.page .usernameInput {
+  font-size: 500%;
+  letter-spacing: 3px;
+}
+
+.login.page .title, .login.page .usernameInput {
+  color: #fff;
+  font-weight: 100;
+}
+
+/* Number of people page */
+
+.numPeople.page {
+  display: none;
+  background-color: #000;
+}
+
+.numPeople.page .numPeopleArea {
+  height: 100px;
+  margin-top: -100px;
+  position: absolute;
+
+  text-align: center;
+  top: 5%;
+  width: 100%;
+}
+
+.numPeople.page .numPeopleArea .numPeopleInput {
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid #fff;
+  outline: none;
+  padding-bottom: 15px;
+  text-align: center;
+  width: 600px;
+}
+
+.numPeople.page .title {
+  font-size: 500%;
+}
+
+.numPeople.page .numPeopleInput {
+  font-size: 500%;
+  letter-spacing: 3px;
+}
+
+.numPeople.page .title, .numPeople.page .numPeopleInput {
+  color: #fff;
+  font-weight: 100;
+}
+
+
+/* Character select page */
+.charSelect.page {
+  display: none;
+  background-color: #000;
+}
+
+.charSelectArea {
+  top: 20%;
+}
+
+.characterArray {
+  font-size: 180%;
+  color: #fff;
+  padding: 10px;
+  font-size: 500%;
+}
+
+/* The waiting page */
+.waiting.page {
+  display: none;
+  background-color: #000;
+  text-align: center;
+}
+
+.waitingText {
+  color: #fff;
+  font-weight: 100;
+  font-size: 500%;
+  text-align: center;
+  top: 35%;
+}
+
+/* Character and knowledge reveal page */
+.charAndReveal.page {
+  display: none;
+  background-color: #000;
+}
+
+.card {
+  height: 70%;
+  width: 70%;
+  max-width: 200px;
+  padding: 30px;
+  margin: 0 auto;
+}
+
+.knownChars {
+  top: 71%;
+  color: #fff; /* other color would be 808080 */
+}
+
+/* Character page */
+.char.page {
+  display: none;
+}
+
+/* Roster page */
+.roster.page {
+  display: none;
+}
+
+/* Pass or Fail page */
+.passFail.page {
+  display: none;
+}
+
+/* Statistics page */
+.stats.page {
+  display: none;
+}
