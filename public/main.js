@@ -14,7 +14,6 @@ $(function() {
 	var $charSelectList = $('.charSelectList');
 	var $cardArea = $('.card');
 	var $nameReveal = $('.nameReveal');
-
 	var $loginPage = $('.login.page');
 	var $numPeoplePage = $('.numPeople.page');
 	var $charSelectPage = $('.charSelect.page');
@@ -75,8 +74,6 @@ $(function() {
 				.data('name', charList[i].name)
 				.append($charBox);
 			$charSelectList
-			.css('top', '5%')
-			.hCenter()
 			.append($characterArray);
 		}
 		$submit = $('<a href="#" class="btn btn-primary active submitButton" role="button">Submit</a>')
@@ -100,21 +97,19 @@ $(function() {
 
 	//projects each user their own character
 	function projectCharacter(charObj) {
-		var $revealName, $name, names, width, flag = true, flag2 = true;
+		var $revealName, $name, names, flag = true, flag2 = true;
 		$waitingPage.fadeOut();
 		$charAndRevealPage.show();
 		$waitingPage.off('click');
-		$nameReveal.lowCenter('72%')
+		$nameReveal
 
-		$('[name="backSide"]').attr("src", "/images/" + charObj['filename']);
+		$('[name="backSide"]').attr("src", "/images/" + charObj['filename']).addClass('img-rounded');
 		$('#card').flip({speed: 200});
 		$('#card').on('flip:done', function() {
 			if(flag) {
 				names = (charObj['know']) ? charObj['know'] : "";
 				for(var i = 0; i < names.length; i++) {
-					$name = $('<label>' + names[i] + '</label>');
-					$revealName = $('<div class="row"><div class="col-lg-12"><div class="namesIKnow"></div></div></div>')
-						.append($name);
+					$revealName = $('<div class="col-xs-2 col-xs-offset-5 text-center"><div class="namesIKnow"><label>' + names[i] + '</label></div></div>')
 					$nameReveal.append($revealName);
 				}
 				flag = false;
@@ -131,8 +126,7 @@ $(function() {
 
 		//adds the 'pick roster' button and the voting cards to the bottom of the screen
 		function addRosterAndCards() {
-			var $pickRoster = $('<a href="#" class="rosterButton">Select Roster</a>')
-				.lowCenter('72%')
+			var $pickRoster = $('<div class="row"><div class="col-xs-2 col-xs-offset-5 text-center"><a href="#" class="btn btn-primary btn-xs active rosterButton" role="button">Select Roster</a></div></div>')
 				.on('click', function() {
 			});
 			$charAndRevealPage.append($pickRoster);
@@ -164,24 +158,6 @@ $(function() {
 	// Prevents input from having injected markup
 	function cleanInput (input) {
 	  return $('<div/>').text(input).text();
-	}
-
-	jQuery.fn.hCenter = function () {
-	  this.css("position","absolute");
-	  // this.css("top", Math.max(0, (($(window).height() - $(this).outerHeight()) / 2) + 
-	  //                                             $(window).scrollTop()) + "px");
-	  this.css("left", Math.max(0, (($(window).width() - $(this).outerWidth()) / 2) + 
-	                                              $(window).scrollLeft()) + "px");
-	  return this;
-	}
-	jQuery.fn.lowCenter = function (low) {
-		low = (low) ? low : '80%';
-		this.css({
-			'position': 'absolute',
-			'top': low,
-			'left': '25%'
-		});
-		return this;
 	}
 
 	function pageFormat (array) {

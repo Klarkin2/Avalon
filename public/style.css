@@ -2,9 +2,25 @@
 
 body { 
   background: black !important;
+  min-width:360px; /* suppose you want minimun width of 1000px */
+  width: auto !important;  /* Firefox will set width as auto */
+  width:360px;             /* As IE ignores !important it will set width as 1000px; */
+
   }
+  
+.top-buffer { margin-top:20px; }
+
+/*#cards {*/
+/*    width:auto;*/
+    /*margin-left:10px; */
+    /*margin-right:10px; */
+/*}*/
 
 
+.fill { 
+    min-height: 100%;
+    height: 100%;
+}
 /* Fix user-agent */
 
 /** {*/
@@ -33,10 +49,10 @@ body {
 /*  padding: 0;*/
 /*}*/
 
-ul {
-  list-style: none;
-  word-wrap: break-word;
-}
+/*ul {*/
+/*  list-style: none;*/
+/*  word-wrap: break-word;*/
+/*}*/
 
 /*input[type='checkbox'] {*/
 /*  -webkit-appearance:none;*/
@@ -103,36 +119,36 @@ ul {
 .nameReveal {
   height: 70px;
   width: 50%;
-  font-size: 300%;
-  color: #989898;
+  font-size: 200%;
+  color: #666699;
   /*background: #000;*/
   display: inline-block;
   position: relative;
-  /*text-align: center;*/
+  text-align: center;
   text-decoration: none;
 }
 
-.rosterButton {
+/*.rosterButton {*/
   /*height: 70px;*/
   /*width: 50%;*/
   /*font-size: 300%;*/
   /*color: #515151;*/
   /*background: #d3d3d3;*/
-  display: inline-block;
+/*  display: inline-block;*/
   /*padding: 5px 20px;*/
   /*text-align: center;*/
   /*text-decoration: none;*/
   /*text-shadow: 1px 1px 1px rgba(255,255,255, .22);*/
 
-  -webkit-border-radius: 30px;
-  -moz-border-radius: 30px;
-  border-radius: 30px;
-  -webkit-transition: all 0.15s ease;
-  -moz-transition: all 0.15s ease;
-  -o-transition: all 0.15s ease;
-  -ms-transition: all 0.15s ease;
-  transition: all 0.15s ease;
-}
+/*  -webkit-border-radius: 30px;*/
+/*  -moz-border-radius: 30px;*/
+/*  border-radius: 30px;*/
+/*  -webkit-transition: all 0.15s ease;*/
+/*  -moz-transition: all 0.15s ease;*/
+/*  -o-transition: all 0.15s ease;*/
+/*  -ms-transition: all 0.15s ease;*/
+/*  transition: all 0.15s ease;*/
+/*}*/
 
 /*.rosterButton:active {*/
 /*  -webkit-box-shadow: inset 0px 0px 10px rgba(0,0,0,.8);*/
@@ -237,7 +253,7 @@ ul {
 /*}*/
 
 
- Character select page 
+ /*Character select page */
 .charSelect.page {
   display: none;
   /*background-color: #000;*/
@@ -258,7 +274,7 @@ ul {
 .waiting.page {
   display: none;
   /*background-color: #000;*/
-  text-align: center;
+  /*text-align: center;*/
 }
 
 /*.waitingText {*/

@@ -23,7 +23,6 @@ var runServer = function() {
 
 	//when a new client connects
 	sokt.socketConnect(io);
-
 };
 
 runServer();
