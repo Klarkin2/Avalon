@@ -66,21 +66,20 @@ $(function() {
 
 	//select special chars
 	function selectChars() {
-		var $charBox, $characterArray, $submit, $charName;
+		var $charBox, $characterArray, $submit;
 		$numPeopleInput.blur(); //hides the keyboard on the special character page
 		for(var i = 0; i < charList.length; i++)
 		{
-			$charBox = $('<input type="checkbox" name = "checkboxes" id="' + charList[i].name + '" value="' + charList[i].name + '">');
-			$charName = $('<label>' + charList[i].name + '</label>');
-			$characterArray = $('<li class="characterArray"/>')
+			$charBox = $('<div class="checkbox"><label><input type="checkbox" name="checkboxes" id="' + charList[i].name + '" value="' + charList[i].name + '">' + charList[i].name + '</label>');
+			$characterArray = $('<div class="characterArray"/>')
 				.data('name', charList[i].name)
-				.append($charBox, $charName);
+				.append($charBox);
 			$charSelectList
 			.css('top', '5%')
 			.hCenter()
 			.append($characterArray);
 		}
-		$submit = $('<a href="#" class="submitButton">Submit</a>')
+		$submit = $('<a href="#" class="btn btn-primary active submitButton" role="button">Submit</a>')
 			.on('click', function() {
 				var $specialChars = $('input[name=checkboxes]:checked');
 				var list = [];
@@ -114,7 +113,7 @@ $(function() {
 				names = (charObj['know']) ? charObj['know'] : "";
 				for(var i = 0; i < names.length; i++) {
 					$name = $('<label>' + names[i] + '</label>');
-					$revealName = $('<div class="row"><div class="col-lg-12"><li class="namesIKnow"/></div></div>')
+					$revealName = $('<div class="row"><div class="col-lg-12"><div class="namesIKnow"></div></div></div>')
 						.append($name);
 					$nameReveal.append($revealName);
 				}
