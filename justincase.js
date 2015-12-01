@@ -38,6 +38,7 @@ exports.getPrompt = function(server, io) {
 			else if(command === 'e') { //e == exit
 				server.close();
 				process.exit();
+				console.log("Server Offline");
 			}
 		});
 	};
@@ -48,14 +49,8 @@ exports.getPrompt = function(server, io) {
 var resetGame = function(io) {
 	totalNumOfPlayers = 0, definedSpecialCharacters = [];
 	usernames = [], ids = {},	numUsers = 0;
-	resetSpecialCharacters();
 	io.sockets.emit('reset');
 	console.log("\x1b[36mReset Successful\x1b[0m");
-};
-
-//removes the player assignment from the special characters
-var resetSpecialCharacters = function() {
-
 };
 
 //gets the ip address where this server will be accessible
