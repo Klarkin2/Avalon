@@ -21,9 +21,11 @@ $(function() {
 	var $waitingPage = $('.waiting.page');
 	var $charAndRevealPage = $('.charAndReveal.page');
 	var $rosterPage = $('.roster.page');
+	var $passFailPage = $('.passFail.page');
 	var $statsPage = $('.stats.page');
 
-	var charList, numUsers, firstConnected = false, cardFlip = true, rosterFlag = true;
+	var charList, numUsers, firstConnected = false;
+	var cardFlip = true, rosterFlag = true, charDisplay = true;
 	var $currentInput = $usernameInput.focus();
 
 	//prompt setting for username
@@ -65,54 +67,57 @@ $(function() {
 		$charSelectPage.show();
 		$numPeoplePage.off('click');	
 
-		//displays the characters that can be selected
-		for(var i = 0; i < charList.length; i++)
-		{
-			$charBox = $('<input type="checkbox" name = "checkboxes" id="' + charList[i].name + '" value="' + charList[i].name + '">');
-			$charName = $('<label>' + charList[i].name + '</label>');
-			$characterArray = $('<li class="characterArray"/>')
-				.data('name', charList[i].name)
-				.append($charBox, $charName);
-			$charSelectList
-			.css('top', '5%')
-			.hCenter()
-			.append($characterArray);
-		}
-		$submit = $('<a href="#" class="submitButton">Submit</a>')
-			.on('click', function() {
-				var $specialChars = $('input[name=checkboxes]:checked');
-				var list = [];
-				$specialChars.each(function (name) {
-					$.grep(charList, function (character) {
-						if(character.name == $specialChars[name].id)
-							list.push(character);
+		if(charDisplay) {
+			//displays the characters that can be selected
+			for(var i = 0; i < charList.length; i++)
+			{
+				$charBox = $('<input type="checkbox" name = "checkboxes" id="' + charList[i].name + '" value="' + charList[i].name + '">');
+				$charName = $('<label>' + charList[i].name + '</label>');
+				$characterArray = $('<li class="characterArray"/>')
+					.data('name', charList[i].name)
+					.append($charBox, $charName);
+				$charSelectList
+				.css('top', '5%')
+				.hCenter()
+				.append($characterArray);
+			}
+			$submit = $('<a href="#" class="submitButton">Submit</a>')
+				.on('click', function() {
+					var $specialChars = $('input[name=checkboxes]:checked');
+					var list = [];
+					$specialChars.each(function (name) {
+						$.grep(charList, function (character) {
+							if(character.name == $specialChars[name].id)
+								list.push(character);
+						});
 					});
-				});
-				socket.emit('special characters to be used in the game', list);
+					socket.emit('special characters to be used in the game', list);
 
-				$charSelectPage.fadeOut();
-				$waitingPage.show();
-				$charSelectPage.off('click');
-			});
-		$charSelectList.append($submit);
+					$charSelectPage.fadeOut();
+					$waitingPage.show();
+					$charSelectPage.off('click');
+				});
+			$charSelectList.append($submit);
+			charDisplay = false;
+		}
 	};
 
 	//projects each user their own character
 	function projectCharacter(charObj) {
-		var $revealName, $name, names, width;
-socket.emit('test', "function called");
+		var $revealName, width, $name = null, names = null;
 		$waitingPage.fadeOut();
 		$charAndRevealPage.show();
 		$waitingPage.off('click');
 		$nameReveal.lowCenter('100%'); //gets the ul out of the way, until the card is flipped
 
 		$('[name="backSide"]').attr("src", "/images/" + charObj['filename']);
-		$('#card').flip({speed: 200});
-		$('#card').on('flip:done', function() {
+		$('#card').flip({speed: 200, trigger: 'click'});
+		$('.frontCard').on('click', function() {
+			$('#card').flip(false);
 			if(cardFlip) {
 				names = (charObj['know']) ? charObj['know'] : "";
 				for(var i = 0; i < names.length; i++) {
-					$name = $('<label>' + names[i] + '</label>');
+					$name = $('<label class="namesIKnow">' + names[i] + '</label>');
 					$revealName = $('<li class="namesIKnow"/>')
 						.append($name);
 					$nameReveal
@@ -121,15 +126,15 @@ socket.emit('test', "function called");
 				}
 				cardFlip = false;
 			}
-			else {
+		});
+		$('.backCard').on('click', function() {
+			$('#card').flip(true);
+			if(rosterFlag) {
 				$nameReveal.css('display', 'none');
-				if(rosterFlag) {
-					addRosterAndCards();
-					rosterFlag = false;
-				}
+				addRosterAndCards();
+				rosterFlag = false;
 			}
 		});
-
 
 		//adds the 'pick roster' button and the voting cards to the bottom of the screen
 		function addRosterAndCards() {
@@ -150,10 +155,15 @@ socket.emit('test', "function called");
 		username = null, numOfUsers = null;
 		$currentInput = $usernameInput.focus();
 		showPage('login');
-		//$charAndRevealPage.remove($('.rosterButton'));
 		$('#card').flip(false);
+		$nameReveal.css('display', "list-item");
+		$('.frontCard').off();
+		$('.backCard').off();
+		//$('#card').off('click');
 		cardFlip = true;
 		rosterFlag = true;
+		$('.namesIKnow').remove();
+		$('.rosterButton').remove();
 	});
 
 	socket.on('all special characters list', function (list) {
@@ -184,8 +194,7 @@ socket.emit('test', "function called");
 	//centers elements higher up on the screen
 	jQuery.fn.hCenter = function () {
 	  this.css("position","absolute");
-	  this.css("left", Math.max(0, (($(window).width() - $(this).outerWidth()) / 2) + 
-	                                              $(window).scrollLeft()) + "px");
+	  this.css("left", Math.max(0, (($(window).width() - $(this).outerWidth()) / 2) + $(window).scrollLeft()) + "px");
 	  return this;
 	}
 
@@ -228,7 +237,7 @@ socket.emit('test', "function called");
 	//shows only the defined page
 	function showPage (page) {
 		var pageNames = ['login', 'numPeople', 'charSelect', 'waiting', 'charAndReveal', 'roster', 'stats'];
-		var pageElements = $.makeArray($('.page')); //[$loginPage, $numPeoplePage, $charSelectPage, $waitingPage, $charAndRevealPage, $rosterPage, $statsPage];
+		var pageElements = $.makeArray($('.page'));
 		var i = pageNames.indexOf(page);
 		$(pageElements).each(function (index, element) {
 			if(index !== i) {
@@ -258,9 +267,15 @@ socket.emit('test', "function called");
 	});
 
 	/*******************************************************************
-	************************Keyboard Events*****************************
+	******************Keyboard And Browser Events***********************
 	*******************************************************************/
 
+	// Prevents the client from refreshing the page and getting disconnected
+	// $(window).bind('beforeunload', function () {
+	// 	return "Are you sure you want to leave? Think of the children!"
+	// });
+
+	// When the user hits 'enter'
 	$window.keydown(function (event) {
 		// Auto-focus the current input when a key is typed
 	  if (!(event.ctrlKey || event.metaKey || event.altKey)) {

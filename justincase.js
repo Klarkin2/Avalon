@@ -66,3 +66,27 @@ exports.getIP = function() {
 	}
 	return addresses;
 }
+
+//original card flip function
+$('#card').on('flip:done', function() { //this gets called repeatedly...
+socket.emit('test', cardFlip);
+			if(cardFlip) {
+				names = (charObj['know']) ? charObj['know'] : "";
+				for(var i = 0; i < names.length; i++) {
+					$name = $('<label class="namesIKnow">' + names[i] + '</label>');
+					$revealName = $('<li class="namesIKnow"/>')
+						.append($name);
+					$nameReveal
+					.lowCenter($('.cards').getRecommendedHeight(3))
+					.append($revealName);
+				}
+				cardFlip = false;
+			}
+			else {
+				$nameReveal.css('display', 'none');
+				if(rosterFlag) {
+					addRosterAndCards();
+					rosterFlag = false;
+				}
+			}
+		});

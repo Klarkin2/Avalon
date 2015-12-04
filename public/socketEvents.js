@@ -48,4 +48,7 @@ exports.socketConnect = function (io) {
 		});
 
 	});
+	io.on('disconnect', function () {
+		
+	});
 };

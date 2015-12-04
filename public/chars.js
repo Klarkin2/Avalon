@@ -38,6 +38,8 @@ var assignPlayers = function(characters, players) {
 var clearPlayers = function(characters) {
 	_.forEach(characters, function (character) {
 		character['player'] = null;
+		character['know'] = null;
+		character['know'] = [];
 	});
 	return characters;
 };
@@ -57,6 +59,7 @@ var charactersKnowledge = function (characters) {
 												(character['side'] === 'e' && character['name'] !== 'Oberon') ? evil :
 												null;
 	});
+//console.log(characters);
 	return characters;
 };
 
