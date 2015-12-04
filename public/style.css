@@ -43,7 +43,7 @@ input[type='checkbox']:checked {
   background: #0066ff;
 }
 
-img {        
+.cards {        
   display:block;
   margin-left:auto;
   margin-right:auto;

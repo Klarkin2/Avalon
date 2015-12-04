@@ -38,6 +38,7 @@ exports.getPrompt = function(server, io) {
 			else if(command === 'e') { //e == exit
 				server.close();
 				process.exit();
+				console.log("Server Offline");
 			}
 		});
 	};
@@ -48,14 +49,8 @@ exports.getPrompt = function(server, io) {
 var resetGame = function(io) {
 	totalNumOfPlayers = 0, definedSpecialCharacters = [];
 	usernames = [], ids = {},	numUsers = 0;
-	resetSpecialCharacters();
 	io.sockets.emit('reset');
 	console.log("\x1b[36mReset Successful\x1b[0m");
-};
-
-//removes the player assignment from the special characters
-var resetSpecialCharacters = function() {
-
 };
 
 //gets the ip address where this server will be accessible
@@ -71,3 +66,27 @@ exports.getIP = function() {
 	}
 	return addresses;
 }
+
+//original card flip function
+$('#card').on('flip:done', function() { //this gets called repeatedly...
+socket.emit('test', cardFlip);
+			if(cardFlip) {
+				names = (charObj['know']) ? charObj['know'] : "";
+				for(var i = 0; i < names.length; i++) {
+					$name = $('<label class="namesIKnow">' + names[i] + '</label>');
+					$revealName = $('<li class="namesIKnow"/>')
+						.append($name);
+					$nameReveal
+					.lowCenter($('.cards').getRecommendedHeight(3))
+					.append($revealName);
+				}
+				cardFlip = false;
+			}
+			else {
+				$nameReveal.css('display', 'none');
+				if(rosterFlag) {
+					addRosterAndCards();
+					rosterFlag = false;
+				}
+			}
+		});

@@ -20,9 +20,10 @@ exports.makeCharacterList = function(names, usedChars, num) {
 //randomly assigns each player to a character
 var assignPlayers = function(characters, players) {
 	var random, flag;
+	characters = clearPlayers(characters);
 	_.forEach(players, function (person) {
 		flag = true;
-		for(var i = 0; flag; i++) { //i < 100 could be added in
+		for(var i = 0; flag && i < 100; i++) { //i < 100 could be added in
 			random = randomBetween(0, characters.length - 1);
 			if(!characters[random]['player']) {
 				characters[random]['player'] = person;
@@ -31,6 +32,16 @@ var assignPlayers = function(characters, players) {
 		}
 	});
 	return charactersKnowledge(characters);
+};
+
+//clears the players names from the character objects
+var clearPlayers = function(characters) {
+	_.forEach(characters, function (character) {
+		character['player'] = null;
+		character['know'] = null;
+		character['know'] = [];
+	});
+	return characters;
 };
 
 //gives the characters their knowledge about other players
@@ -48,6 +59,7 @@ var charactersKnowledge = function (characters) {
 												(character['side'] === 'e' && character['name'] !== 'Oberon') ? evil :
 												null;
 	});
+//console.log(characters);
 	return characters;
 };
 

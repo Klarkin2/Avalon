@@ -16,7 +16,7 @@
     <li class="numPeople page">
       <div class="numPeopleArea">
         <h3 class="title">Number of Players</h3>
-        <input class="numPeopleInput" type="number" maxlength="2" />
+        <input class="numPeopleInput" type="text" maxlength="2" />
       </div>
     </li>
     <li class="charSelect page">
@@ -32,16 +32,20 @@
     <li class="charAndReveal page">
       <div id="card"> 
         <div class="front"> 
-          <img src="/images/Back.png" name="frontSide" class="cards"/>
+          <img src="/images/Back.png" name="frontSide" class="cards frontCard"/>
         </div> 
         <div class="back">
-          <img src="/images/Back.png" name="backSide" class="cards"/>
+          <img src="/images/Back.png" name="backSide" class="cards backCard"/>
         </div> 
       </div>
       <ul class="nameReveal"></ul>
     </li>
     <li class="roster page">
       <div class="rosterArea">
+      </div>
+    </li>
+    <li class="passFail page">
+      <div class="passFailArea">
       </div>
     </li>
     <li class="stats page">

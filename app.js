@@ -15,7 +15,7 @@ var runServer = function() {
 	//start listening to port
 	server.listen(port, function() {
 		console.log("Server Online: \x1b[36m" + more.getIP() + ":" + port + "\x1b[0m");
-		more.getPrompt(server);
+		more.getPrompt(server, io);
 	});
 
 	//route additional files properly
