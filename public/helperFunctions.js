@@ -16,11 +16,73 @@ exports.addUserGetInfo = function (socket, username) {
 
 //send each client their character object
 exports.sendClientIdentity = function(io) {
-	var id, list = chars.makeCharacterList(usernames, definedSpecialCharacters, numUsers);
+	var id, list = makeCharacterList(usernames, definedSpecialCharacters, numUsers);
 	_.forEach(list, function (character) {
 		id = ids[character['player']];
 		io.sockets.connected[id].emit('defined character player list', character);
 	});
+};
+
+var makeCharacterList = function(names, usedChars, num) {
+	var numB = (num < 7) ? 2 :
+						 (num < 10) ? 3 : 4;
+	var numG = num - numB;
+
+	_.forEach(usedChars, function (characters) {
+		(characters['side'] === 'g') ? numG-- : numB--;
+	});
+
+	for(var i = 0; i < numB; i++)
+		usedChars.push(chars.bChar[i]);
+	for(var i = 0; i < numG; i++)
+		usedChars.push(chars.gChar[i]);
+	return assignPlayers(usedChars, names);
+};
+
+//randomly assigns each player to a character
+var assignPlayers = function(characters, players) {
+	var random, flag;
+	characters = clearPlayers(characters);
+	_.forEach(players, function (person) {
+		flag = true;
+		for(var i = 0; flag && i < 100; i++) { //i < 100 could be added in
+			random = randomBetween(0, characters.length - 1);
+			if(!characters[random]['player']) {
+				characters[random]['player'] = person;
+				flag = false;
+			}
+		}
+	});
+	return charactersKnowledge(characters);
+};
+
+//clears the players names from the character objects
+var clearPlayers = function(characters) {
+	_.forEach(characters, function (character) {
+		character['player'] = null;
+		character['know'] = null;
+		character['know'] = [];
+	});
+	return characters;
+};
+
+//gives the characters their knowledge about other players
+var charactersKnowledge = function(characters) {
+	var merlin = [], percival = [], evil = [];
+	_.forEach(characters, function (character) {
+		(character.revealMerlin) ? merlin.push(character.player) : null;
+		(character.revealPercival) ? percival.push(character.player) : null;
+		(character.revealEvil) ? evil.push(character.player) : null;
+	});
+
+	_.forEach(characters, function (character) {
+		character['know'] = (character['name'] === "Merlin") ? merlin :
+												(character['name'] === 'Percival') ? percival :
+												(character['side'] === 'e' && character['name'] !== 'Oberon') ? evil :
+												null;
+	});
+//console.log(characters);
+	return characters;
 };
 
 //if the client wants to reset
@@ -48,14 +110,8 @@ exports.getPrompt = function(server, io) {
 var resetGame = function(io) {
 	totalNumOfPlayers = 0, definedSpecialCharacters = [];
 	usernames = [], ids = {},	numUsers = 0;
-	resetSpecialCharacters();
 	io.sockets.emit('reset');
 	console.log("\x1b[36mReset Successful\x1b[0m");
-};
-
-//removes the player assignment from the special characters
-var resetSpecialCharacters = function() {
-
 };
 
 //gets the ip address where this server will be accessible
@@ -70,4 +126,9 @@ exports.getIP = function() {
 	  }
 	}
 	return addresses;
+};
+
+//gives a random number between min and max
+function randomBetween(min,max) {
+  return Math.floor(Math.random()*(max-min+1)+min);
 }
