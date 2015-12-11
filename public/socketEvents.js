@@ -2,8 +2,6 @@ var more = require('./helperFunctions.js'),
 		chars = require('./chars.js'),
 		characters = chars.specialChar;
 
-var numPlayersDefined = false, specialCharsDefined = false;
-
 exports.socketConnect = function (io) {
 	io.on('connection', function (socket) {
 
@@ -16,11 +14,21 @@ exports.socketConnect = function (io) {
 
 		//execute this when a user gets added to the game
 		socket.on('add user', function (username) {
-			more.addUserGetInfo(socket, username);
-			(numUsers === 1) ? socket.emit('all special characters list', characters) : null;
-			socket.emit('first connected or waiting', usernames[0]);
-	    if(totalNumOfPlayers == numUsers && numPlayersDefined && specialCharsDefined)
-	    	more.sendClientIdentity(io);
+			if(username in userStates) {
+				socket.emit('reconnect', userStates[username]);
+				more.updateUserSocket(socket, username);
+			}
+			else {
+				more.addUserGetInfo(socket, username);
+				socket.emit('first connected or waiting', usernames[0]);
+	    	if(totalNumOfPlayers == numUsers && numPlayersDefined && specialCharsDefined)
+	    		more.sendClientIdentity(io);
+	    }
+		});
+
+		// fulfills the clients request for list of all special characters
+		socket.on('request all special characters', function () {
+			socket.emit('all special characters list', characters)
 		});
 
 		//sets the variable of how many players there will be
@@ -39,6 +47,15 @@ exports.socketConnect = function (io) {
 	    	more.sendClientIdentity(io);
 		});
 
+		//updates the users state
+		socket.on('user state update', function (state) {
+			more.updateUserState(state['username'], state['object']);
+		});
+
+		socket.on('send existing identities', function () {
+			more.sendExistingIdentity(io, definedSpecialCharacters);
+		});
+
 
 		//more sockets here
 
@@ -47,8 +64,5 @@ exports.socketConnect = function (io) {
 			console.log(value);
 		});
 
-	});
-	io.on('disconnect', function () {
-		
 	});
 };

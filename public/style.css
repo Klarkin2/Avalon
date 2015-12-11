@@ -263,7 +263,7 @@ input[type='checkbox']:checked {
 }
 
 /* Character and knowledge reveal page */
-.charAndReveal.page {
+.reveal.page {
   display: none;
   background-color: #000;
 }

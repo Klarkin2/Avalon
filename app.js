@@ -9,8 +9,9 @@ var more = require('./public/helperFunctions.js'),
 
 var runServer = function() {
 	//initiate global variables
+	numPlayersDefined = false, specialCharsDefined = false;
 	totalNumOfPlayers = 0, definedSpecialCharacters = [];
-	usernames = [], ids = {},	numUsers = 0;
+	usernames = [], userStates = {}, ids = {},	numUsers = 0;
 
 	//start listening to port
 	server.listen(port, function() {

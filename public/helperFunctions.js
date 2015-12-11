@@ -2,27 +2,54 @@ var os = require('os'),
 		_ = require('lodash'),
 		prompt = require('prompt');
 
-var more = require('./helperFunctions.js'),
-		chars = require('./chars.js'),
-		characters = chars.specialChar;
+var chars = require('./chars.js');
 
 //add the user to the game, get info about the users socket connection
 exports.addUserGetInfo = function (socket, username) {
 	socket.username = username; //store the username in the socket session for this client
 	ids[username] = socket.id; //store the id as well
+	userStates[username] = {state: "login", character: null, cardFlipped: false};
 	usernames.push(username); //add client username to global list
 	++numUsers; //you could probably guess what this does...
 };
 
-//send each client their character object
+//updates the users socket connection on reconnect
+exports.updateUserSocket = function (socket, username) {
+	ids[username] = socket.id;
+};
+
+//updates the users state, if he refreshes the page, he'll be able to use his username to resume the game
+exports.updateUserState = function (username, object) {
+	var objAttr = ['state', 'character', 'cardFlipped'];
+	_.forEach(objAttr, function (attr) {
+		if(attr in object)
+			userStates[username][attr] = (userStates[username][attr] === object[attr]) ? userStates[username][attr] : object[attr];
+	});
+	return userStates;
+}
+
+//assign character identities and send each client their character object
 exports.sendClientIdentity = function(io) {
-	var id, list = makeCharacterList(usernames, definedSpecialCharacters, numUsers);
-	_.forEach(list, function (character) {
+	var chars = makeCharacterList(usernames, definedSpecialCharacters, numUsers);
+	sendIds(io, chars);
+};
+
+//send each client their existing character object
+exports.sendExistingIdentity = function(io, chars) {
+	sendIds(io, chars);
+};
+
+//send identites to the client
+var sendIds = function (io, chars) {
+	var id;
+	_.forEach(chars, function (character) {
 		id = ids[character['player']];
 		io.sockets.connected[id].emit('defined character player list', character);
+		userStates[character['player']] = {state: "reveal", character: character, cardFlipped: false};
 	});
 };
 
+//auto generates a list of good/evil characters based on special characters defined and number of users
 var makeCharacterList = function(names, usedChars, num) {
 	var numB = (num < 7) ? 2 :
 						 (num < 10) ? 3 : 4;
@@ -81,7 +108,6 @@ var charactersKnowledge = function(characters) {
 												(character['side'] === 'e' && character['name'] !== 'Oberon') ? evil :
 												null;
 	});
-//console.log(characters);
 	return characters;
 };
 
@@ -101,6 +127,8 @@ exports.getPrompt = function(server, io) {
 				server.close();
 				process.exit();
 			}
+			else
+				ask();
 		});
 	};
 	ask();
@@ -108,8 +136,9 @@ exports.getPrompt = function(server, io) {
 
 //resets the game (number of players, defined special characters, and identities)
 var resetGame = function(io) {
+	numPlayersDefined = false, specialCharsDefined = false;
 	totalNumOfPlayers = 0, definedSpecialCharacters = [];
-	usernames = [], ids = {},	numUsers = 0;
+	usernames = [], userStates = {}, ids = {},	numUsers = 0;
 	io.sockets.emit('reset');
 	console.log("\x1b[36mReset Successful\x1b[0m");
 };
