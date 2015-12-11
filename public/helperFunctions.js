@@ -4,52 +4,31 @@ var os = require('os'),
 
 var chars = require('./chars.js');
 
-//add the user to the game, get info about the users socket connection
+// Add the user to the game, get info about the users socket connection
 exports.addUserGetInfo = function (socket, username) {
-	socket.username = username; //store the username in the socket session for this client
-	ids[username] = socket.id; //store the id as well
+	socket.username = username; // Store the username in the socket session for this client
+	ids[username] = socket.id; // Store the id as well
 	userStates[username] = {state: "login", character: null, cardFlipped: false};
-	usernames.push(username); //add client username to global list
-	++numUsers; //you could probably guess what this does...
+	usernames.push(username); // Add client username to global list
+	++numUsers; // You could probably guess what this does...
 };
 
-//updates the users socket connection on reconnect
+// Updates the users socket connection on reconnect
 exports.updateUserSocket = function (socket, username) {
 	ids[username] = socket.id;
 };
 
-//updates the users state, if he refreshes the page, he'll be able to use his username to resume the game
-exports.updateUserState = function (username, object) {
-	var objAttr = ['state', 'character', 'cardFlipped'];
-	_.forEach(objAttr, function (attr) {
-		if(attr in object)
-			userStates[username][attr] = (userStates[username][attr] === object[attr]) ? userStates[username][attr] : object[attr];
-	});
-	return userStates;
-}
-
-//assign character identities and send each client their character object
+// Assign character identities and send each client their character object
 exports.sendClientIdentity = function(io) {
-	var chars = makeCharacterList(usernames, definedSpecialCharacters, numUsers);
-	sendIds(io, chars);
-};
-
-//send each client their existing character object
-exports.sendExistingIdentity = function(io, chars) {
-	sendIds(io, chars);
-};
-
-//send identites to the client
-var sendIds = function (io, chars) {
-	var id;
-	_.forEach(chars, function (character) {
+	var id, list = makeCharacterList(usernames, definedSpecialCharacters, numUsers);
+	_.forEach(list, function (character) {
 		id = ids[character['player']];
 		io.sockets.connected[id].emit('defined character player list', character);
 		userStates[character['player']] = {state: "reveal", character: character, cardFlipped: false};
 	});
 };
 
-//auto generates a list of good/evil characters based on special characters defined and number of users
+// Auto generates a list of good/evil characters based on special characters defined and number of users
 var makeCharacterList = function(names, usedChars, num) {
 	var numB = (num < 7) ? 2 :
 						 (num < 10) ? 3 : 4;
@@ -66,13 +45,13 @@ var makeCharacterList = function(names, usedChars, num) {
 	return assignPlayers(usedChars, names);
 };
 
-//randomly assigns each player to a character
+// Randomly assigns each player to a character
 var assignPlayers = function(characters, players) {
 	var random, flag;
 	characters = clearPlayers(characters);
 	_.forEach(players, function (person) {
 		flag = true;
-		for(var i = 0; flag && i < 100; i++) { //i < 100 could be added in
+		for(var i = 0; flag && i < 100; i++) { // i < 100 could be added in
 			random = randomBetween(0, characters.length - 1);
 			if(!characters[random]['player']) {
 				characters[random]['player'] = person;
@@ -83,7 +62,7 @@ var assignPlayers = function(characters, players) {
 	return charactersKnowledge(characters);
 };
 
-//clears the players names from the character objects
+// Clears the players names from the character objects
 var clearPlayers = function(characters) {
 	_.forEach(characters, function (character) {
 		character['player'] = null;
@@ -93,7 +72,7 @@ var clearPlayers = function(characters) {
 	return characters;
 };
 
-//gives the characters their knowledge about other players
+// Gives the characters their knowledge about other players
 var charactersKnowledge = function(characters) {
 	var merlin = [], percival = [], evil = [];
 	_.forEach(characters, function (character) {
@@ -111,19 +90,22 @@ var charactersKnowledge = function(characters) {
 	return characters;
 };
 
-//if the client wants to reset
+// If the client wants to reset
 exports.getPrompt = function(server, io) {
-	var command, properties = {name: "cmd", description: "Enter Command (Reset, Exit)", required: true};
+	var command, properties = {name: "cmd", description: "Enter Command (Exit, Reset, Clear Cookies)", required: true};
 	prompt.start();
 	function ask() {
 		prompt.get(properties, function (err, result) {
 			if(err) console.log(err);
 			command = result['cmd'].toLowerCase().charAt(0);
-			if(command === 'r') { //r == reset
+			if(command === 'r') { // r == reset
 				resetGame(io);
 				ask();
 			}
-			else if(command === 'e') { //e == exit
+			else if(command === 'c') { // c == clear cookies
+				// Logic to clear cookies from clients
+			}
+			else if(command === 'e') { // e == exit
 				server.close();
 				process.exit();
 			}
@@ -134,7 +116,7 @@ exports.getPrompt = function(server, io) {
 	ask();
 };
 
-//resets the game (number of players, defined special characters, and identities)
+// Resets the game (number of players, defined special characters, and identities)
 var resetGame = function(io) {
 	numPlayersDefined = false, specialCharsDefined = false;
 	totalNumOfPlayers = 0, definedSpecialCharacters = [];
@@ -143,7 +125,7 @@ var resetGame = function(io) {
 	console.log("\x1b[36mReset Successful\x1b[0m");
 };
 
-//gets the ip address where this server will be accessible
+// Gets the ip address where this server will be accessible
 exports.getIP = function() {
 	var interfaces = os.networkInterfaces(), addresses = [];
 	for (var k in interfaces) {
@@ -157,7 +139,7 @@ exports.getIP = function() {
 	return addresses;
 };
 
-//gives a random number between min and max
+// Gives a random number between min and max
 function randomBetween(min,max) {
   return Math.floor(Math.random()*(max-min+1)+min);
 }

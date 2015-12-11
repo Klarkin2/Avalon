@@ -1,13 +1,4 @@
 $(function() {
-	// Initialize variables
-	var FADE_TIME = 150; // ms
-  var TYPING_TIMER_LENGTH = 400; // ms
-  var COLORS = [
-    '#e21400', '#91580f', '#f8a700', '#f78b00',
-    '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
-    '#3b88eb', '#3824aa', '#a700ff', '#d300e7'
-  ];
-
 	var $window = $(window);
 	var $usernameInput = $('.usernameInput');
 	var $numPeopleInput = $('.numPeopleInput');
@@ -24,48 +15,71 @@ $(function() {
 	var $passFailPage = $('.passFail.page');
 	var $statsPage = $('.stats.page');
 
-	var charList, numUsers, firstConnected = false;
+	var charList, totalNumUsers, firstConnected = false;
 	var cardFlip = false, rosterFlag = false, charDisplay = true;
 	var $currentInput = $usernameInput.focus();
 
-	//prompt setting for username
-	var username, numOfUsers;
-
 	var socket = io();
+	$.cookie.json = true;
 
-	//sets the username for that socket
+	defineStateCookie();
+	var username = ($.cookie('username')) ? userHasCookie() : null;
+	defineSpecialCharacterList();
+
+	// Define the initial state cookie that will be used in case the user refreshes his page.
+	// This cookie will be used to direct the user back to the page they left
+	function defineStateCookie() {
+		if(!$.cookie('user state'))
+			$.cookie('user state', {state: null, character: null, cardFlipped: null});
+	};
+
+	// If the user has a cookie, assign username variable and move to next page
+	function userHasCookie() {
+		socket.emit('add user', $.cookie('username')['username']);
+		return $.cookie('username')['username'];
+	};
+
+	// Creates a cookie of a list of all special characters
+	function defineSpecialCharacterList() {
+		if($.cookie('special characters list'))
+			charList = $.cookie('special characters list');
+		else
+			socket.emit('request all special characters');
+	};
+
+	// Sets the username for that socket
 	function setUsername() {
 		username = cleanInput($usernameInput.val().trim());
 		socket.emit('add user', username);
+		$.cookie('username', {username: username});
 	};
 
-	//takes users to the lobby
+	// Takes users to the lobby
 	function lobby() {
-		socket.emit('user state update', {username: username, object: {state: 'waiting'}});
+		updateUserState({state: 'waiting'});
 		$usernameInput.blur(); //hides the keyboard on the waiting page/lobby
 		pulsateWaitingText();
 		$waitingPage.show();
 		$loginPage.off('click');
 	};
 
-	//defines the number of players
+	// Defines the number of players
 	function numPlayersPage() {
-		socket.emit('user state update', {username: username, object: {state: 'numPeople'}});
-		socket.emit('request all special characters');
+		updateUserState({state: 'numPeople'});
 		firstConnected = true;
 		$numPeoplePage.show();
 		$loginPage.off('click');
 		$currentInput = $numPeopleInput.focus();
 	};
 
-	//defines the special characters
+	// Defines the special characters
 	function setSpecialChars(reconnect) {
 		var $charBox, $characterArray, $submit, $charName;
-		numOfUsers = cleanInput($numPeopleInput.val().trim());
+		totalNumUsers = cleanInput($numPeopleInput.val().trim());
 		$numPeopleInput.blur(); //hides the keyboard on the special character page
 
-		socket.emit('define number of players this game', numOfUsers);
-		socket.emit('user state update', {username: username, object: {state: 'charSelect'}});
+		socket.emit('define number of players this game', totalNumUsers);
+		updateUserState({state: 'charSelect'});
 		$numPeoplePage.fadeOut();
 		$charSelectPage.show();
 		$numPeoplePage.off('click');	
@@ -94,8 +108,8 @@ $(function() {
 					});
 
 					socket.emit('special characters to be used in the game', list);
-					socket.emit('user state update', {username: username, object: {state: 'waiting'}});
 
+					updateUserState({state: 'waiting'});
 					$charSelectPage.fadeOut();
 					$usernameInput.blur(); //hides the keyboard on the waiting page/lobby
 					pulsateWaitingText();
@@ -108,10 +122,10 @@ $(function() {
 		(reconnect) ? socket.emit('send existing identities') : null;
 	};
 
-	//projects each user their own character
+	// Projects each user their own character
 	function projectCharacter(charObj) {
 		var $revealName, width, $name = null, names = null;
-		socket.emit('user state update', {username: username, object: {state: 'reveal', character: charObj}});
+		updateUserState({state: 'reveal', character: charObj});
 		$waitingPage.fadeOut();
 		$revealPage.show();
 		$waitingPage.off('click');
@@ -122,7 +136,7 @@ $(function() {
 		$('.frontCard').on('click', function() {
 			$('#card').flip(false);
 			if(!cardFlip) {
-				socket.emit('user state update', {username: username, object: {cardFlipped: true}});
+				updateUserState({cardFlipped: true});
 				names = (charObj['know']) ? charObj['know'] : "";
 				for(var i = 0; i < names.length; i++) {
 					$name = $('<label class="namesIKnow">' + names[i] + '</label>');
@@ -144,7 +158,7 @@ $(function() {
 			}
 		});
 
-		//adds the 'pick roster' button and the voting cards to the bottom of the screen
+		// Adds the 'pick roster' button and the voting cards to the bottom of the screen
 		function addRosterAndCards() {
 			var $pickRoster = $('<a href="#" class="rosterButton">Select Roster</a>')
 				.lowCenter($('.cards').getRecommendedHeight(3))
@@ -159,8 +173,8 @@ $(function() {
 **************************Socket Events*****************************
 *******************************************************************/
 	socket.on('reset', function (bool) {
-		numUsers = null, firstConnected = false;
-		username = null, numOfUsers = null;
+		firstConnected = false;
+		username = null, totalNumUsers = null;
 		$currentInput = $usernameInput.focus();
 		showPage('login');
 		$('#card').flip(false);
@@ -174,11 +188,8 @@ $(function() {
 	});
 
 	socket.on('all special characters list', function (list) {
+		$.cookie('special characters list', list);
 		charList = list;
-	});
-
-	socket.on('current number of users', function (num) {
-		numUsers = num;
 	});
 
 	socket.on('defined character player list', function (list) {
@@ -189,21 +200,6 @@ $(function() {
 		(firstUsername === username) ? numPlayersPage() : lobby();
 	});
 
-	socket.on('reconnect', function (state) {
-		var page = null;
-		socket.emit('request all special characters');
-		cardFlip = state['cardFlipped'];
-		rosterFlag = !state['cardFlipped'];
-		page = state['state'];
-		pulsateWaitingText();
-		showPage('waiting');
-		setTimeout(function() {
-			showPage(state['state']);
-			(page === 'numPeople') ? numPlayersPage() :
-			(page === 'charSelect') ? setSpecialChars(true) :
-			(page === 'reveal') ? projectCharacter(state['character']) : null;
-		}, 750);
-	});
 
 	/*******************************************************************
 	***********************Random Functions*****************************
@@ -214,14 +210,14 @@ $(function() {
 	  return $('<div/>').text(input).text();
 	}
 
-	//centers elements higher up on the screen
+	// Centers elements higher up on the screen
 	jQuery.fn.hCenter = function () {
 	  this.css("position","absolute");
 	  this.css("left", Math.max(0, (($(window).width() - $(this).outerWidth()) / 2) + $(window).scrollLeft()) + "px");
 	  return this;
 	}
 
-	//centers elements lower on the screen. Let the user define how low.
+	// Centers elements lower on the screen. Let the user define how low.
 	jQuery.fn.lowCenter = function (low) {
 		low = (low) ? low : '80%';
 		this.css({
@@ -232,7 +228,7 @@ $(function() {
 		return this;
 	}
 
-	//gets recommended percentage for name reveals and 'pick roster' button
+	// Gets recommended percentage for name reveals and 'pick roster' button
 	jQuery.fn.getRecommendedHeight = function(addedHeight) {
 		imgHeight = this.height();
 		windowHeight = $(window).height();
@@ -248,7 +244,7 @@ $(function() {
 		return string;
 	};
 
-	//Pulsate waiting text
+	// Pulsate waiting text
 	function pulsateWaitingText () {
 		var p = $(".waitingText");
 		  for(var i=0; i<30; i++) {
@@ -257,7 +253,7 @@ $(function() {
 		  }
 	};
 
-	//shows only the defined page
+	// Shows only the defined page
 	function showPage (page) {
 		var pageNames = ['login', 'numPeople', 'charSelect', 'waiting', 'reveal', 'roster', 'passFail', 'stats'];
 		var pageElements = $.makeArray($('.page'));
@@ -272,7 +268,18 @@ $(function() {
 		});
 	};
 
-	//removes element from array
+	// Updates the user state cookie
+	function updateUserState (update) {
+		var objAttr = ['state', 'character', 'cardFlipped'];
+		var cookie = $.cookie('user state');
+		for(var i = 0; i < objAttr.length; i++) {
+			if(objAttr[i] in update)
+				cookie[objAttr[i]] = update[objAttr[i]];
+		}
+		$.cookie('user state', cookie);
+	};
+
+	// Removes element from array
 	Array.prototype.remove = function(from, to) {
 	  var rest = this.slice((to || from) + 1 || this.length);
 	  this.length = from < 0 ? this.length + from : from;
@@ -293,11 +300,6 @@ $(function() {
 	******************Keyboard And Browser Events***********************
 	*******************************************************************/
 
-	// Prevents the client from refreshing the page and getting disconnected
-	// $(window).bind('beforeunload', function () {
-	// 	return "Are you sure you want to leave? Think of the children!"
-	// });
-
 	// When the user hits 'enter'
 	$window.keydown(function (event) {
 		// Auto-focus the current input when a key is typed
@@ -308,7 +310,7 @@ $(function() {
 	  if(event.which === 13) {
 	  	if(!username)
 	  		setUsername();
-	  	else if(!numOfUsers && firstConnected)
+	  	else if(!totalNumUsers && firstConnected)
 				setSpecialChars();
 		}
 	});
