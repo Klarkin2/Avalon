@@ -10,7 +10,7 @@ var more = require('./public/helperFunctions.js'),
 var runServer = function() {
 	// Initiate global variables
 	numPlayersDefined = false, specialCharsDefined = false;
-	totalNumOfPlayers = 0, definedSpecialCharacters = [];
+	totalNumOfPlayers = 0, definedSpecialCharacters = [], assignedPlayerList = [];
 	usernames = [], userStates = {}, ids = {},	numUsers = 0;
 
 	// Start listening to port

@@ -15,28 +15,50 @@ $(function() {
 	var $passFailPage = $('.passFail.page');
 	var $statsPage = $('.stats.page');
 
-	var charList, totalNumUsers, firstConnected = false;
-	var cardFlip = false, rosterFlag = false, charDisplay = true;
+	var charList, totalNumUsers, firstConnected, audio1, audio2;
+	var charDisplay = true;
 	var $currentInput = $usernameInput.focus();
 
 	var socket = io();
-	$.cookie.json = true;
-
+	$.cookie.json = true; // Enables objects (instead of strings) to be stored in cookies.
 	defineStateCookie();
 	var username = ($.cookie('username')) ? userHasCookie() : null;
-	defineSpecialCharacterList();
 
 	// Define the initial state cookie that will be used in case the user refreshes his page.
-	// This cookie will be used to direct the user back to the page they left
-	function defineStateCookie() {
-		if(!$.cookie('user state'))
+	function defineStateCookie(bool) {
+		if(!$.cookie('user state') || bool)
 			$.cookie('user state', {state: null, character: null, cardFlipped: null});
 	};
 
 	// If the user has a cookie, assign username variable and move to next page
 	function userHasCookie() {
-		socket.emit('add user', $.cookie('username')['username']);
+		socket.emit('add user', {username: $.cookie('username')['username'], state: $.cookie('user state')});
 		return $.cookie('username')['username'];
+	};
+
+	// Sets the username for that socket
+	function setUsername() {
+		username = cleanInput($usernameInput.val().trim());
+		socket.emit('add user', {username, state: $.cookie('user state')});
+		$.cookie('username', {username: username});
+	};
+
+	// Takes users to the lobby
+	function lobby() {
+		updateUserState({state: 'waiting'});
+		$usernameInput.blur(); // Hides the keyboard on the waiting page/lobby
+		pulsateWaitingText();
+		$waitingPage.show();
+		$loginPage.off('click');
+	};
+
+	// Defines the number of players
+	function numPlayersPage() {
+		updateUserState({state: 'numPeople'});
+		defineSpecialCharacterList();
+		$numPeoplePage.show();
+		$loginPage.off('click');
+		$currentInput = $numPeopleInput.focus();
 	};
 
 	// Creates a cookie of a list of all special characters
@@ -47,33 +69,8 @@ $(function() {
 			socket.emit('request all special characters');
 	};
 
-	// Sets the username for that socket
-	function setUsername() {
-		username = cleanInput($usernameInput.val().trim());
-		socket.emit('add user', username);
-		$.cookie('username', {username: username});
-	};
-
-	// Takes users to the lobby
-	function lobby() {
-		updateUserState({state: 'waiting'});
-		$usernameInput.blur(); //hides the keyboard on the waiting page/lobby
-		pulsateWaitingText();
-		$waitingPage.show();
-		$loginPage.off('click');
-	};
-
-	// Defines the number of players
-	function numPlayersPage() {
-		updateUserState({state: 'numPeople'});
-		firstConnected = true;
-		$numPeoplePage.show();
-		$loginPage.off('click');
-		$currentInput = $numPeopleInput.focus();
-	};
-
 	// Defines the special characters
-	function setSpecialChars(reconnect) {
+	function setSpecialChars() {
 		var $charBox, $characterArray, $submit, $charName;
 		totalNumUsers = cleanInput($numPeopleInput.val().trim());
 		$numPeopleInput.blur(); //hides the keyboard on the special character page
@@ -119,7 +116,6 @@ $(function() {
 			$charSelectList.append($submit);
 			charDisplay = false;
 		}
-		(reconnect) ? socket.emit('send existing identities') : null;
 	};
 
 	// Projects each user their own character
@@ -134,8 +130,9 @@ $(function() {
 		$('[name="backSide"]').attr("src", "/images/" + charObj['filename']);
 		$('#card').flip({speed: 200, trigger: 'click'});
 		$('.frontCard').on('click', function() {
+			audio1.play();
 			$('#card').flip(false);
-			if(!cardFlip) {
+			if(!$.cookie('cardFlip')) {
 				updateUserState({cardFlipped: true});
 				names = (charObj['know']) ? charObj['know'] : "";
 				for(var i = 0; i < names.length; i++) {
@@ -146,15 +143,16 @@ $(function() {
 					.lowCenter($('.cards').getRecommendedHeight(3))
 					.append($revealName);
 				}
-				cardFlip = true;
+				$.cookie('cardFlip', true);
 			}
 		});
 		$('.backCard').on('click', function() {
+			audio2.play();
 			$('#card').flip(true);
-			if(!rosterFlag) {
+			if(!$.cookie('rosterFlag')) {
 				$nameReveal.css('display', 'none');
 				addRosterAndCards();
-				rosterFlag = true;
+				$.cookie('rosterFlag', true);
 			}
 		});
 
@@ -172,19 +170,20 @@ $(function() {
 /*******************************************************************
 **************************Socket Events*****************************
 *******************************************************************/
-	socket.on('reset', function (bool) {
-		firstConnected = false;
-		username = null, totalNumUsers = null;
+	socket.on('reset', function (firstUsername) {
+		defineStateCookie(true); // Reset the users state at the beginning of a new round
+		$usernameInput.attr('value', username);
 		$currentInput = $usernameInput.focus();
 		showPage('login');
-		$('#card').flip(false);
-		$nameReveal.css('display', "list-item");
 		$('.frontCard').off();
 		$('.backCard').off();
-		cardFlip = false;
-		rosterFlag = false;
+		$.cookie('cardFlip', false);
+		$.cookie('rosterFlag', false);
 		$('.namesIKnow').remove();
 		$('.rosterButton').remove();
+		$('#card').flip(false);
+		$nameReveal.css('display', "list-item");
+		totalNumUsers = null, username = null;
 	});
 
 	socket.on('all special characters list', function (list) {
@@ -197,7 +196,18 @@ $(function() {
 	});
 
 	socket.on('first connected or waiting', function (firstUsername) {
+		defineStateCookie(true); // Reset the users state at the beginning of a new round
+		firstConnected = (firstUsername === username) ? true : false;
 		(firstUsername === username) ? numPlayersPage() : lobby();
+	});
+
+	socket.on('show page', function (page) {
+		showPage(page);
+	});
+
+	socket.on('define card flags', function (obj) {
+		('cardFlip' in obj) ? $.cookie('cardFlip', obj['cardFlip']) : null;
+		('rosterFlag' in obj) ? $.cookie('rosterFlag', obj['rosterFlag']) : null;
 	});
 
 
@@ -285,6 +295,21 @@ $(function() {
 	  this.length = from < 0 ? this.length + from : from;
 	  return this.push.apply(this, rest);
 	};
+
+	// Setup for audio effects when flipping cards
+	$(document).ready(function() {
+    audio1 = document.createElement('audio');
+    audio2 = document.createElement('audio');
+    audio1.setAttribute('src', '/audio/Flip1.mp3');
+    audio2.setAttribute('src', '/audio/Flip2.mp3');
+    $.get();
+    audio1.addEventListener('load', function() {
+      audio1.play();
+    });
+    audio2.addEventListener('load', function() {
+      audio2.play();
+    });
+  });
 
 	// Focus input when clicking anywhere on login page
 	$loginPage.click(function () {

@@ -6,11 +6,16 @@ exports.socketConnect = function (io) {
 	io.on('connection', function (socket) {
 
 		// Execute this when a user gets added to the game
-		socket.on('add user', function (username) {
-			if(username in userStates)
+		socket.on('add user', function (userObj) {
+			var username = userObj['username'];
+			var obj = userObj['state'];
+			if(username in userStates) {
 				more.updateUserSocket(socket, username);
-			else {
+				more.userRefresh(io, username, obj);
+				socket.emit('define card flags', {rosterFlag: false});
+			} else {
 				more.addUserGetInfo(socket, username);
+				socket.emit('define card flags', {cardFlip: false, rosterFlag: false});
 				socket.emit('first connected or waiting', usernames[0]);
 	    	if(totalNumOfPlayers == numUsers && numPlayersDefined && specialCharsDefined)
 	    		more.sendClientIdentity(io);

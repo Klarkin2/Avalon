@@ -20,12 +20,21 @@ exports.updateUserSocket = function (socket, username) {
 
 // Assign character identities and send each client their character object
 exports.sendClientIdentity = function(io) {
-	var id, list = makeCharacterList(usernames, definedSpecialCharacters, numUsers);
-	_.forEach(list, function (character) {
+	var id, assignedPlayerList = makeCharacterList(usernames, definedSpecialCharacters, numUsers);
+	_.forEach(assignedPlayerList, function (character) {
 		id = ids[character['player']];
 		io.sockets.connected[id].emit('defined character player list', character);
 		userStates[character['player']] = {state: "reveal", character: character, cardFlipped: false};
 	});
+};
+
+// Handler for when user refreshes his page
+exports.userRefresh = function (io, username, obj) {
+	var id = ids[username], page = obj['state'];
+	(page === 'login') ? io.sockets.connected[id].emit('show page', page) :
+	(page === 'numPeople' || page === 'charSelect' || page === 'waiting') ? io.sockets.connected[id].emit('first connected or waiting', usernames[0]) :
+	(page === 'reveal') ? io.sockets.connected[id].emit('defined character player list', obj['character']) :
+	console.log(obj['state']);
 };
 
 // Auto generates a list of good/evil characters based on special characters defined and number of users
@@ -119,7 +128,7 @@ exports.getPrompt = function(server, io) {
 // Resets the game (number of players, defined special characters, and identities)
 var resetGame = function(io) {
 	numPlayersDefined = false, specialCharsDefined = false;
-	totalNumOfPlayers = 0, definedSpecialCharacters = [];
+	totalNumOfPlayers = 0, definedSpecialCharacters = [], assignedPlayerList = [];
 	usernames = [], userStates = {}, ids = {},	numUsers = 0;
 	io.sockets.emit('reset');
 	console.log("\x1b[36mReset Successful\x1b[0m");
